@@ -1,47 +1,33 @@
-from collections import defaultdict, Counter
 
-train = [
-    [("the", "DT"), ("dog", "NN"), ("barks", "VB")],
-    [("a", "DT"), ("cat", "NN"), ("sleeps", "VB")],
-    [("the", "DT"), ("cat", "NN"), ("chases", "VB"), ("the", "DT"), ("dog", "NN")],
-    [("a", "DT"), ("dog", "NN"), ("chases", "VB"), ("a", "DT"), ("cat", "NN")],
-    [("the", "DT"), ("big", "JJ"), ("dog", "NN"), ("barks", "VB")],
-    [("a", "DT"), ("small", "JJ"), ("cat", "NN"), ("sleeps", "VB")],
-]
+import random
 
-transition = defaultdict(Counter)
-emission = defaultdict(Counter)
-tag_count = Counter()
-for sent in train:
-    prev = "<s>"
-    for word, tag in sent:
-        transition[prev][tag] += 1
-        emission[tag][word] += 1
-        tag_count[tag] += 1
-        prev = tag
+# Training data
+training_data = {
+    "dog": ["NN", "NN", "NN"],
+    "run": ["VB", "NN"],
+    "beautiful": ["JJ", "JJ"],
+    "quickly": ["RB", "RB"],
+    "cat": ["NN", "NN"],
+    "eat": ["VB", "VB"]
+}
 
-tags = list(tag_count)
+def stochastic_tagger(words):
+    tagged_words = []
 
-def p_trans(prev, tag):
-    return (transition[prev][tag] + 0.01) / (sum(transition[prev].values()) + 0.01 * len(tags))
+    for word in words:
+        if word in training_data:
+            tag = random.choice(training_data[word])
+        else:
+            tag = "NN"
 
-def p_emit(tag, word):
-    return (emission[tag][word] + 0.01) / (tag_count[tag] + 0.01 * 50)
+        tagged_words.append((word, tag))
 
-def viterbi(words):
-    V = [{t: p_trans("<s>", t) * p_emit(t, words[0]) for t in tags}]
-    back = [{}]
-    for i in range(1, len(words)):
-        V.append({}); back.append({})
-        for t in tags:
-            prob, prev = max((V[i-1][p] * p_trans(p, t) * p_emit(t, words[i]), p) for p in tags)
-            V[i][t], back[i][t] = prob, prev
-    best = max(V[-1], key=V[-1].get)
-    path = [best]
-    for i in range(len(words) - 1, 0, -1):
-        best = back[i][best]
-        path.insert(0, best)
-    return list(zip(words, path))
+    return tagged_words
 
-for s in ["the dog sleeps", "a big cat chases the dog", "the small dog barks"]:
-    print(s, "->", viterbi(s.split()))
+sentence = ["dog", "run", "beautiful", "cat"]
+
+result = stochastic_tagger(sentence)
+
+print("Input Sentence:", sentence)
+print("Tagged Sentence:")
+print(result)
