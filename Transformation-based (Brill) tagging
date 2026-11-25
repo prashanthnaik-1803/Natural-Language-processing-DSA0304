@@ -1,28 +1,36 @@
-lexicon = {"i": "PRP", "want": "VBP", "to": "TO", "the": "DT", "a": "DT",
-           "dog": "NN", "book": "NN", "flight": "NN", "can": "MD"}
 
-# (from_tag, to_tag, required previous tag)
-rules = [
-    ("NN", "VB", "TO"),
-    ("VB", "NN", "DT"),
-]
+def initial_tag(word):
+    if word in ["the", "a", "an"]:
+        return "DT"
+    elif word.endswith("ing"):
+        return "VBG"
+    elif word.endswith("ly"):
+        return "RB"
+    else:
+        return "NN"
 
-def initial_tag(words):
-    return [lexicon.get(w.lower(), "NN") for w in words]
+def transformation_tag(words):
+    tagged = []
 
-def apply_rules(words, tags):
-    tags = tags[:]
-    for frm, to, prev in rules:
-        for i in range(1, len(tags)):
-            if tags[i] == frm and tags[i - 1] == prev:
-                print(f"  rule applied at '{words[i]}': {frm} -> {to} (prev tag = {prev})")
-                tags[i] = to
-    return tags
+    for word in words:
+        tag = initial_tag(word)
+        tagged.append([word, tag])
 
-for sentence in ["I want to book a flight", "I want the book"]:
-    words = sentence.split()
-    base = initial_tag(words)
-    print("\nSentence     :", sentence)
-    print("Initial tags :", list(zip(words, base)))
-    final = apply_rules(words, base)
-    print("Final tags   :", list(zip(words, final)))
+    # Transformation rule:
+    # Change NN to VB when the word follows "to".
+    for i in range(1, len(tagged)):
+        if tagged[i-1][0] == "to":
+            if tagged[i][1] == "NN":
+                tagged[i][1] = "VB"
+
+    return tagged
+
+sentence = ["the", "students", "to", "dance", "quickly"]
+
+result = transformation_tag(sentence)
+
+print("Input:", sentence)
+print("Transformed Tags:")
+
+for item in result:
+    print(item)
