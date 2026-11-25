@@ -1,0 +1,32 @@
+import re
+
+rules = [
+    (r"^(the|a|an)$", "DT"),
+    (r"^(i|you|he|she|it|we|they)$", "PRP"),
+    (r"^(in|on|at|over|under|with|from|to|of|by)$", "IN"),
+    (r"^(and|or|but)$", "CC"),
+    (r"^-?\d+(\.\d+)?$", "CD"),
+    (r"^(is|am|are|was|were|be|been)$", "VB"),
+    (r".*ing$", "VBG"),
+    (r".*ed$", "VBD"),
+    (r".*ly$", "RB"),
+    (r".*(ous|ful|able|ive|al|ic)$", "JJ"),
+    (r".*'s$", "POS"),
+    (r".*s$", "NNS"),
+    (r"^[A-Z][a-z]+$", "NNP"),
+    (r"^[.,;:!?]$", "PUNCT"),
+    (r".*", "NN"),
+]
+
+def tag_word(word):
+    for pattern, tag in rules:
+        if re.match(pattern, word, re.IGNORECASE if tag != "NNP" else 0):
+            return tag
+
+def tag_sentence(sentence):
+    words = re.findall(r"\w+(?:'\w+)?|[.,;:!?]", sentence)
+    return [(w, tag_word(w)) for w in words]
+
+sent = "The children were playing happily in the garden and 3 dogs barked loudly."
+for word, tag in tag_sentence(sent):
+    print(f"{word:<10}{tag}")
