@@ -1,30 +1,25 @@
+
 import random
-from collections import defaultdict, Counter
+from collections import defaultdict
 
-corpus = """
-natural language processing is a field of artificial intelligence .
-natural language processing helps computers understand human language .
-machine learning is a part of artificial intelligence .
-machine learning helps computers learn from data .
-computers understand language and computers learn from data .
-"""
-tokens = corpus.lower().split()
+text = "natural language processing is interesting. natural language processing is useful."
 
-model = defaultdict(Counter)
-for w1, w2 in zip(tokens, tokens[1:]):
-    model[w1][w2] += 1
+words = text.lower().split()
 
-def generate(start_word, length=12):
-    word = start_word.lower()
-    output = [word]
-    for _ in range(length - 1):
-        if word not in model:
-            break
-        nxt = model[word]
-        word = random.choices(list(nxt), weights=list(nxt.values()))[0]
-        output.append(word)
-    return " ".join(output)
+bigrams = defaultdict(list)
 
-print("Bigram counts for 'language':", dict(model["language"]))
-for start in ["natural", "machine", "computers"]:
-    print(f"Start '{start}':", generate(start))
+for i in range(len(words) - 1):
+    bigrams[words[i]].append(words[i + 1])
+
+word = random.choice(words)
+result = [word]
+
+for i in range(10):
+    if word in bigrams:
+        word = random.choice(bigrams[word])
+        result.append(word)
+    else:
+        break
+
+print("Generated Text:")
+print(" ".join(result))
